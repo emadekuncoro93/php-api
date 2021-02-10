@@ -1,7 +1,10 @@
 <?php
+error_reporting (E_ALL ^ E_NOTICE);
+
 require "../bootstrap.php";
 use Src\Controller\UserController;
 use Src\Controller\CheckoutController;
+use Src\Controller\OrderController;
 
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
@@ -26,6 +29,9 @@ switch($path){
     break;
     case 'checkout':
         $controller = new CheckoutController($dbConnection, $requestMethod, $userId);
+    break;
+    case 'order':
+        $controller = new OrderController($dbConnection, $requestMethod, $userId);
     break;
     default:
         $path = null;

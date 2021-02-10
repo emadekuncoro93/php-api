@@ -1,9 +1,9 @@
 <?php
 namespace Src\Controller;
 use Src\Controller\BaseController;
-use Src\Service\UserService;
+use Src\Service\OrderService;
 
-class UserController extends BaseController {
+class OrderController extends BaseController {
 
     private $db;
     private $requestMethod;
@@ -15,18 +15,14 @@ class UserController extends BaseController {
         $this->db = $db;
         $this->requestMethod = $requestMethod;
         $this->userId = $userId;
-        $this->service = new UserService($db);
+        $this->service = new OrderService($db);
     }
 
     public function processRequest()
     {
         switch ($this->requestMethod) {
-            case 'GET':
-                if ($this->userId) {
-                    $response = $this->getUser($this->userId);
-                } else {
-                    $response = $this->getAllUsers();
-                };
+            case 'POST':
+                $response = $this->order();
                 break;
             default:
                 $response = $this->notFoundResponse();
@@ -38,14 +34,11 @@ class UserController extends BaseController {
         }
     }
 
-    private function getAllUsers()
-    {
-        return $this->service->getAllUser();
+    public function order(){
+        $input = (array) json_decode(file_get_contents('php://input', true));
+        return $this->service->add($input);
+
     }
 
-    private function getUser($id)
-    {
-        return $this->service->getUser($id);
-    }
-
+    
 }

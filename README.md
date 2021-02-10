@@ -12,18 +12,20 @@ what might happened :
  - system reduces the number of items in stock negative (-1).
 
 why this happened:
-this is race condition when multiple constumer checkout same product at the same time.
+ - this is race condition when multiple constumer checkout same product at the same time.
+ - there's no inventory checking after succeed payment leading to wrong inventory quantity
 
 2.
 proposed solution:
 - create lock mechanism to prevent same product id checkout at the same time, give a timeout for next process
 - create API to invalidate other active order once stock is empty
-- mysql pesimistic lock to prevent update table at the same time
-- create messaging system in payment so that the payment system run in quenue
+- db pessimistic locking to prevent update table at the same time
 
 
 3. run the app
-- run composer install
+- run `composer install`
 - edit .env file based on db configuration
-- php dbseed.php
-- run php -S localhost:8080 -t public
+- run `php dbseed.php`
+- run `php -S localhost:8080 -t public`
+
+

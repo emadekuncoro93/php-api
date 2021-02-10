@@ -1,9 +1,9 @@
 <?php
 namespace Src\Controller;
-
+use Src\Controller\BaseController;
 use Src\Service\UserService;
 
-class CheckoutController {
+class CheckoutController extends BaseController {
 
     private $db;
     private $requestMethod;
@@ -27,7 +27,7 @@ class CheckoutController {
                 $response = $this->checkout();
                 break;
             default:
-                $response = null;
+                $response =  $this->notFoundResponse();
                 break;
         }
         header($response['status_code_header']);

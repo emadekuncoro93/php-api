@@ -26,7 +26,7 @@ class UserService {
             return $this->notFoundResponse();
         }
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = json_encode($result);
+        $response['body'] = json_encode(['code' => 'SUCCESS', 'data' => $result]);
         return $response;
     }
 
