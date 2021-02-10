@@ -15,9 +15,9 @@ class CheckoutService {
         $this->ProductRepository = new ProductRepository($db);
     }
 
-    private function BaseException($msg=null, $data=null){
-        $response['status_code_header'] = 'HTTP/1.1 404 Not Found';
-        $response['body'] = json_encode(['code' => 'ERROR', 'message' => $msg, 'data'=> $data]);
+    private function BaseResponse($code, $msg=null, $data=null){
+        $response['status_code_header'] = 'HTTP/1.1 200 Ok';
+        $response['body'] = json_encode(['code' => $code, 'message' => $msg, 'data'=> $data]);
         return $response;
     }
 
@@ -26,31 +26,35 @@ class CheckoutService {
         $orderId = $data['orderId'];
         $is_valid_order = $this->OrderRepository->find($orderId);
         if(empty($is_valid_order)){
-           return $this->BaseException('order not found', $data);
+           return $this->BaseResponse('ERROR','order not found', $data);
         }
         $productId = $is_valid_order['productId'];
         $quantity = (int) $is_valid_order['quantity'];
         $is_paid = $this->callPaymentGateway();
-        if($is_paid){
+        if($is_paid){ 
             $update_inventory = $this->updateInventory($orderId, $productId, $quantity);
             if(!$update_inventory){
                 $this->resetInventory($productId, $quantity);  
-                return false;  
+                return $this->BaseResponse('ERROR','failed update inventory', $data);  
             }
-            return true;
+            return  $this->BaseResponse('SUCCESS','SUCCESS', $data);  ;
         }
         $this->resetInventory($productId, $quantity);
-        return false;
+        return $this->BaseResponse('ERROR','failed payment', $data);
     }
 
     private function callPaymentGateway(){
-        error_log('success callPaymentGateway');
-        return true;
+        error_log('callPaymentGateway');
+        return false;
     }
 
     private function resetInventory($productId, $quantity){
         error_log('resetInventory');
         $currentStock = $this->ProductRepository->getStockById($productId);
+        if($currentStock < 1){
+            error_log('unable proceed reset inventory while stock: '.$currentStock);
+            return false;
+        }
         $total = $currentStock + $quantity;
         $this->ProductRepository->update($productId, $total);
     }
@@ -58,10 +62,6 @@ class CheckoutService {
     private function updateInventory($orderId, $productId, $quantity){
         error_log('updateInventory');
         $currentStock = $this->ProductRepository->getStockById($productId);
-        if($currentStock < 1){
-            error_log('stock empty');
-            return false;
-        }
         $remain = $currentStock - $quantity;
         if($remain > 0){
             $this->ProductRepository->update($productId, $remain);
