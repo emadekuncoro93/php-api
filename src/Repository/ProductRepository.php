@@ -15,7 +15,7 @@ class ProductRepository {
     {
         $statement = "
             SELECT
-                 Stock
+                 stock
             FROM
                 products
             WHERE productId = ?;
@@ -25,16 +25,14 @@ class ProductRepository {
             $statement = $this->db->prepare($statement);
             $statement->execute(array($productId));
             $result = $statement->fetch(\PDO::FETCH_ASSOC);
-            return $result->stock;
+            return (int) $result['stock'];
         } catch (\PDOException $e) {
             exit($e->getMessage());
         }
     }
 
-    public function update($id, $quantity)
+    public function update($id, $stock)
     {
-        $currenctStock = $this->getStockById($id);
-        $quantity += $currenctStock;
         $statement = "
             UPDATE products
             SET
@@ -45,8 +43,8 @@ class ProductRepository {
         try {
             $statement = $this->db->prepare($statement);
             $statement->execute(array(
-                'id' => (int) $productId,
-                'stock'  => $quantity
+                'id' => $id,
+                'stock'  => $stock
             ));
             return $statement->rowCount();
         } catch (\PDOException $e) {

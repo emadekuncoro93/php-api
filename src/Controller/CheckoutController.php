@@ -1,7 +1,7 @@
 <?php
 namespace Src\Controller;
 use Src\Controller\BaseController;
-use Src\Service\UserService;
+use Src\Service\CheckoutService;
 
 class CheckoutController extends BaseController {
 
@@ -9,7 +9,6 @@ class CheckoutController extends BaseController {
     private $requestMethod;
     private $userId;
     private $service;
-    private $total = 1;
 
 
     public function __construct($db, $requestMethod, $userId)
@@ -17,13 +16,13 @@ class CheckoutController extends BaseController {
         $this->db = $db;
         $this->requestMethod = $requestMethod;
         $this->userId = $userId;
-        $this->service = new UserService($db);
+        $this->service = new CheckoutService($db);
     }
 
     public function processRequest()
     {
         switch ($this->requestMethod) {
-            case 'GET':
+            case 'POST':
                 $response = $this->checkout();
                 break;
             default:
@@ -36,63 +35,8 @@ class CheckoutController extends BaseController {
         }
     }
 
-
     public function checkout(){
-        error_log('start checkout process');
-        $productId = 1;
-        $quantity = 1;
-        $is_valid_order = $this->checkOrder($productId);
-        $is_paid = $this->callPaymentGateway();
-        if($is_paid){
-            $update_inventory = $this->updateInventory($productId, $quantity);
-            if(!$update_inventory){
-                $this->resetInventory($productId, $quantity);  
-                return false;  
-            }
-            error_log('total :'.$this->total);
-            return true;
-        }
-        $this->resetInventory($productId, $quantity);
-        error_log('total :'.$this->total);
-        return false;
-    }
-
-    private function callPaymentGateway(){
-        error_log('callPaymentGateway');
-        return true;
-    }
-
-    private function resetInventory($productId, $quantity){
-        error_log('resetInventory');
-        $this->total += $quantity;
-        return true;
-    }
-
-    private function updateInventory($productId, $total_item){
-        error_log('updateInventory');
-        $currentStock = $this->getTotalInventory();
-        if($currentStock - $total_item > 0){
-            return true;
-        }else if($currentStock - $total_item == 0){
-            //if this is last item but there's active order, invalidate all other order with same productId
-            $this->invalidateActiveOrder($productId);
-            return true;
-        }
-        return false;
-    }
-
-    private function getTotalInventory(){
-        error_log('getTotalInventory');
-        return $this->total;
-    }
-
-    private function checkOrder($productId){
-        error_log('checkOrder');
-        return true;
-    }
-
-    private function invalidateActiveOrder($productId){
-        error_log('invalidateActiveOrder');
-        return true;
+        $input = (array) json_decode(file_get_contents('php://input', true));
+        return $this->service->checkout($input);
     }
 }
