@@ -17,10 +17,8 @@ why this happened:
 
 2.
 proposed solution:
-- create lock mechanism to prevent same product id checkout at the same time, give a timeout for next process
 - create API to invalidate other active order once stock is empty
 - db pessimistic locking to prevent update table at the same time
-
 
 3. run the app
 - run `composer install`
