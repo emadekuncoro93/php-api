@@ -21,6 +21,7 @@ class CheckoutService {
         return $response;
     }
 
+    //order positive scenario
     public function checkout($data){
         
         $orderId = $data['orderId'];
@@ -34,18 +35,19 @@ class CheckoutService {
         if($is_paid){ 
             $update_inventory = $this->updateInventory($orderId, $productId, $quantity);
             if(!$update_inventory){
-                $this->resetInventory($productId, $quantity);  
-                return $this->BaseResponse('ERROR','failed update inventory', $data);  
+                return $this->BaseResponse('ERROR','order failed | update inventory failed', $data);  
             }
+            //update orderId status to paid
+            $this->OrderRepository->updatePaymentStatus($orderId, 'paid');
             return  $this->BaseResponse('SUCCESS','SUCCESS', $data);  ;
         }
-        $this->resetInventory($productId, $quantity);
-        return $this->BaseResponse('ERROR','failed payment', $data);
+        $this->OrderRepository->updatePaymentStatus($orderId, 'failed');
+        return $this->BaseResponse('ERROR','order failed | payment failed', $data);
     }
 
     private function callPaymentGateway(){
         error_log('callPaymentGateway');
-        return false;
+        return true;
     }
 
     private function resetInventory($productId, $quantity){

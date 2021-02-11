@@ -107,4 +107,28 @@ class OrderRepository {
         }
     }
 
+    public function updatePaymentStatus($orderId, $status)
+    {
+        $statement = "
+            UPDATE order_cart
+            SET
+                payment_status = :status
+            WHERE orderId = :orderId;
+        ";
+
+        try {
+            $statement = $this->db->prepare($statement);
+            $statement->execute(array(
+                'status' => $status,
+                'orderId' => $orderId       
+            ));
+            return $statement->rowCount();
+        } catch (\PDOException $e) {
+            error_log('failed update payment status');
+            return false;
+        }
+    }
+
+    
+
 }
