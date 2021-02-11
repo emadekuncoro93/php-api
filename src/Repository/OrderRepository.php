@@ -34,7 +34,12 @@ class OrderRepository {
 
     public function add(Array $data)
     {
-         $statement = "
+        $userId = $data['userId'];
+        $productId = $data['productId'];
+        if(!$this->validateOrder($productId, $userId)){
+            return 0;
+        }
+        $statement = "
             INSERT INTO order_cart
             (userId, productId, quantity, total_price)
                 VALUES
@@ -55,6 +60,29 @@ class OrderRepository {
         } catch (\PDOException $e) {
             error_log('failed to add order, data :', json_encode($data));
             return 0;
+        }
+    }
+
+    public function validateOrder($productId, $userId){
+        $statement = "
+            SELECT
+                orderId
+            FROM
+                order_cart
+            WHERE userId = ? and productId = ? and status = 1;
+        ";
+
+        try {
+            $statement = $this->db->prepare($statement);
+            $statement->execute(array($productId, $userId));
+            $result = $statement->fetch(\PDO::FETCH_ASSOC);
+            if(empty($result)){
+                return true;
+            }
+            return false;
+        } catch (\PDOException $e) {
+            error_log('failed to validate order, data :', json_encode($data));
+            return false;
         }
     }
 

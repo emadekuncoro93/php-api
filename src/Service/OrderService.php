@@ -15,9 +15,22 @@ class OrderService {
 
     public function add($data){
         $result = $this->OrderRepository->add($data);
+        if($result == 0){
+            return $this->badRequestResponse('order exist');
+        }
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $code = $result > 0 ? 'SUCCESS' : 'ERROR';
-        $response['body'] = json_encode(['code' => $code, 'data'=> $data]);
+        $response['body'] = json_encode(['code' => 'SUCCESS', 'data'=> $data]);
+        return $response;
+    }
+
+    
+    public function badRequestResponse($msg="Bad Request")
+    {
+        $response['status_code_header'] = 'HTTP/1.1 400 Bad Request';
+        $response['body'] = json_encode([
+            'code' => 'ERROR',
+            'message' => $msg
+        ]);
         return $response;
     }
 }
