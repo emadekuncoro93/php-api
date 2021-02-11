@@ -18,7 +18,7 @@ class OrderRepository {
                  *
             FROM
                 order_cart
-            WHERE orderId = ? and status = 1;
+            WHERE orderId = ? and status = 1 FOR UPDATE;
         ";
 
         try {

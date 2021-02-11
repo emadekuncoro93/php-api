@@ -25,6 +25,7 @@ class CheckoutService {
     public function checkout($data){
         
         $orderId = $data['orderId'];
+        //check active order
         $is_valid_order = $this->OrderRepository->find($orderId);
         if(empty($is_valid_order)){
            return $this->BaseResponse('ERROR','order not found', $data);
@@ -33,14 +34,16 @@ class CheckoutService {
         $quantity = (int) $is_valid_order['quantity'];
         $is_paid = $this->callPaymentGateway();
         if($is_paid){ 
+            //update payment status to paid
+            $this->OrderRepository->updatePaymentStatus($orderId, 'paid');
+            //update stock
             $update_inventory = $this->updateInventory($orderId, $productId, $quantity);
             if(!$update_inventory){
                 return $this->BaseResponse('ERROR','order failed | update inventory failed', $data);  
             }
-            //update orderId status to paid
-            $this->OrderRepository->updatePaymentStatus($orderId, 'paid');
             return  $this->BaseResponse('SUCCESS','SUCCESS', $data);  ;
         }
+        //update payment status to failed
         $this->OrderRepository->updatePaymentStatus($orderId, 'failed');
         return $this->BaseResponse('ERROR','order failed | payment failed', $data);
     }
@@ -61,6 +64,7 @@ class CheckoutService {
         $this->ProductRepository->update($productId, $total);
     }
 
+    //update inventory positive scenario
     private function updateInventory($orderId, $productId, $quantity){
         error_log('updateInventory');
         $currentStock = $this->ProductRepository->getStockById($productId);

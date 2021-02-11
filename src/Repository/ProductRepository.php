@@ -18,7 +18,7 @@ class ProductRepository {
                  stock
             FROM
                 products
-            WHERE productId = ?;
+            WHERE productId = ? FOR UPDATE;
         ";
 
         try {
