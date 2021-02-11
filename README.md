@@ -26,4 +26,24 @@ proposed solution:
 - run `php dbseed.php`
 - run `php -S localhost:8080 -t public`
 
+- curl example for add order
 
+curl --location --request POST 'localhost:8080/order' \
+--header 'Content-Type: application/json' \
+--header 'Cookie: PHPSESSID=tvtjekgp8hpse6eqa1im62aqtp' \
+--data-raw '{
+    "userId":1,
+    "productId":1,
+    "quantity":1,
+    "total_price":1000
+  
+}'
+
+- curl example for checkout
+
+curl --location --request POST 'http://localhost:8080/checkout' \
+--header 'Content-Type: application/json' \
+--header 'Cookie: PHPSESSID=tvtjekgp8hpse6eqa1im62aqtp' \
+--data-raw '{
+    "orderId" : 1
+}'
