@@ -74,7 +74,7 @@ class OrderRepository {
 
         try {
             $statement = $this->db->prepare($statement);
-            $statement->execute(array($productId, $userId));
+            $statement->execute(array($userId, $productId));
             $result = $statement->fetch(\PDO::FETCH_ASSOC);
             if(empty($result)){
                 return true;
